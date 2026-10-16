@@ -1,0 +1,6 @@
+.venv/
+.vscode/
+**pycache**/
+chroma_db/
+.DS_Store
+.env
