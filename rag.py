@@ -1,30 +1,51 @@
+
 import chromadb
 import ollama
-
 import config
 
 client = ollama.Client(host=config.OLLAMA_HOST)
-collection = chromadb.PersistentClient(path=config.CHROMA_DIR).get_collection(config.COLLECTION)
+
+collection = chromadb.PersistentClient(
+    path=config.CHROMA_DIR
+).get_collection(config.COLLECTION)
 
 
 def retrieve(query, k=config.TOP_K):
-    q_emb = client.embed(model=config.EMBED_MODEL, input=[query])["embeddings"][0]
-    res = collection.query(query_embeddings=[q_emb], n_results=k * 4)   # over-fetch
+    q_emb = client.embed(
+        model=config.EMBED_MODEL,
+        input=[query]
+    )["embeddings"][0]
+
+    res = collection.query(
+        query_embeddings=[q_emb],
+        n_results=k * 4
+    )
+
     hits, seen = [], set()
-    for doc, meta, dist in zip(res["documents"][0], res["metadatas"][0], res["distances"][0]):
-        key = " ".join(doc.split())[:150].lower()    # fingerprint of the chunk's opening
+
+    for doc, meta, dist in zip(
+        res["documents"][0],
+        res["metadatas"][0],
+        res["distances"][0]
+    ):
+        key = " ".join(doc.split())[:150].lower()
+
         if key in seen:
-            continue                                  # near-duplicate of a closer hit
+            continue
+
         seen.add(key)
+
         hits.append({
             "text": doc,
             "source": meta["source"],
             "page": meta["page"],
             "also_in": meta["also_in"],
-            "distance": dist,
+            "distance": dist
         })
+
         if len(hits) == k:
             break
+
     return hits
 
 
@@ -38,36 +59,72 @@ Answer ONLY from the numbered context passages below.
 
 def build_prompt(query, hits):
     parts = []
+
     for i, h in enumerate(hits, 1):
-        parts.append(f"[{i}] (source: {h['source']}, page {h['page']})\n{h['text']}")
+        parts.append(
+            f"[{i}] (source: {h['source']}, page {h['page']})\n{h['text']}"
+        )
+
     context = "\n\n".join(parts)
+
     return f"Context:\n{context}\n\nQuestion: {query}"
 
 
 def answer(query, k=config.TOP_K):
     hits = retrieve(query, k)
+
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": build_prompt(query, hits)},
+        {"role": "user", "content": build_prompt(query, hits)}
     ]
-    resp = client.chat(model=config.LLM_MODEL, messages=messages,
-                       options={"temperature": 0.1})
+
+    resp = client.chat(
+        model=config.LLM_MODEL,
+        messages=messages,
+        options={"temperature": 0.1}
+    )
+
     return resp["message"]["content"], hits
 
-if __name__ == "__main__":
-    import sys
-    args = sys.argv[1:]
-    show_chunks = "--chunks" in args
-    query = " ".join(a for a in args if a != "--chunks") or "What is the deadline for HAW-ForschungsSchub?"
 
-    if show_chunks:                      # debug mode: only show retrieval
-        for i, h in enumerate(retrieve(query), 1):
-            print(f"[{i}] {h['source']} p.{h['page']}  distance={h['distance']:.3f}")
-            print(h["text"][:250].replace("\n", " "))
+if __name__ == "__main__":
+    print("KIWi - THWS Knowledge Assistant")
+    print("Ask a question or type 'exit' to quit.\n")
+
+    while True:
+        try:
+            query = input("You: ").strip()
+
+            if query.lower() in ("exit", "quit"):
+                print("KIWi: Goodbye!")
+                break
+
+            if not query:
+                continue
+
+            print("\nKIWi is searching your documents...\n")
+
+            text, hits = answer(query)
+
+            print("KIWi:", text)
+
+            if hits:
+                print("\nSources:")
+
+                for i, h in enumerate(hits, 1):
+                    print(
+                        f"  [{i}] {h['source']} "
+                        f"p.{h['page']} "
+                        f"distance={h['distance']:.3f}"
+                    )
+            else:
+                print("\nNo relevant document passages were retrieved.")
+
             print()
-    else:                                # normal mode: full RAG answer
-        text, hits = answer(query)
-        print(text)
-        print("\nSources:")
-        for i, h in enumerate(hits, 1):
-            print(f"  [{i}] {h['source']} p.{h['page']}  distance={h['distance']:.3f}")
+
+        except KeyboardInterrupt:
+            print("\nKIWi: Goodbye!")
+            break
+
+        except Exception as e:
+            print(f"\nAn error occurred: {e}\n")

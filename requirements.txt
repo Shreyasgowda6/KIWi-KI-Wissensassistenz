@@ -1,0 +1,4 @@
+chromadb
+ollama
+PyMuPDF
+langchain-text-splitters
