@@ -28,10 +28,46 @@ def retrieve(query, k=config.TOP_K):
     return hits
 
 
+SYSTEM_PROMPT = """You are KIWi, a knowledge assistant for THWS staff.
+Answer ONLY from the numbered context passages below.
+- Cite the passages you used like [1], [2].
+- If the context does not contain the answer, say you could not find it in the documents. Do not guess.
+- If passages conflict (for example different issues of a newsletter give different dates), say so and prefer the most recent issue.
+- Answer in the same language as the question. Be concise."""
+
+
+def build_prompt(query, hits):
+    parts = []
+    for i, h in enumerate(hits, 1):
+        parts.append(f"[{i}] (source: {h['source']}, page {h['page']})\n{h['text']}")
+    context = "\n\n".join(parts)
+    return f"Context:\n{context}\n\nQuestion: {query}"
+
+
+def answer(query, k=config.TOP_K):
+    hits = retrieve(query, k)
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": build_prompt(query, hits)},
+    ]
+    resp = client.chat(model=config.LLM_MODEL, messages=messages,
+                       options={"temperature": 0.1})
+    return resp["message"]["content"], hits
+
 if __name__ == "__main__":
     import sys
-    query = " ".join(sys.argv[1:]) or "What is the deadline for HAW-ForschungsSchub?"
-    for i, h in enumerate(retrieve(query), 1):
-        print(f"[{i}] {h['source']} p.{h['page']}  distance={h['distance']:.3f}")
-        print(h["text"] if i == 1 else h["text"][:250].replace("\n", " "))
-        print()
+    args = sys.argv[1:]
+    show_chunks = "--chunks" in args
+    query = " ".join(a for a in args if a != "--chunks") or "What is the deadline for HAW-ForschungsSchub?"
+
+    if show_chunks:                      # debug mode: only show retrieval
+        for i, h in enumerate(retrieve(query), 1):
+            print(f"[{i}] {h['source']} p.{h['page']}  distance={h['distance']:.3f}")
+            print(h["text"][:250].replace("\n", " "))
+            print()
+    else:                                # normal mode: full RAG answer
+        text, hits = answer(query)
+        print(text)
+        print("\nSources:")
+        for i, h in enumerate(hits, 1):
+            print(f"  [{i}] {h['source']} p.{h['page']}  distance={h['distance']:.3f}")
