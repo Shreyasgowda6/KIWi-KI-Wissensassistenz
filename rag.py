@@ -2,6 +2,7 @@
 import chromadb
 import ollama
 import config
+from intent_classifier import classify_intent
 
 client = ollama.Client(host=config.OLLAMA_HOST)
 
@@ -70,7 +71,11 @@ def build_prompt(query, hits):
     return f"Context:\n{context}\n\nQuestion: {query}"
 
 
-def answer(query, k=config.TOP_K):
+def answer(query, k=config.TOP_K, *, show_intent=False):
+    intent, classification_status = classify_intent(client, query)
+    if show_intent:
+        detail = "" if classification_status == "ok" else f" ({classification_status})"
+        print(f"Intent: {intent}{detail}\n", flush=True)
     hits = retrieve(query, k)
 
     messages = [
@@ -104,7 +109,7 @@ if __name__ == "__main__":
 
             print("\nKIWi is searching your documents...\n")
 
-            text, hits = answer(query)
+            text, hits = answer(query, show_intent=True)
 
             print("KIWi:", text)
 
