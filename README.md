@@ -232,6 +232,21 @@ This mode helps investigate whether the correct document passages are being retr
 
 ## Configuration
 
+### Question intent classification
+
+Each call to `answer()` classifies the question with the configured local
+Ollama model before retrieval. This adds one local model call per question;
+classification does not change retrieval or the answer and is not saved to a file.
+The interactive terminal displays `Intent: <label>` as soon as classification
+finishes, before the answer is generated.
+
+Supported intents are `deadline`, `requirements`, `procedure`, `opportunities`,
+`comparison`, `source_lookup`, `summary`, `factual`, and `other`.
+For example, "What is the deadline for HAW-ForschungsSchub?" should be classified
+as `deadline`. Labels are model predictions and should be evaluated against
+your questions. Failed or invalid classifications use `unknown` with status
+`error` or `invalid_response`; answering continues.
+
 The main configuration options are defined in `config.py`.
 
 | Setting | Purpose |
