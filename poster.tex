@@ -1,0 +1,162 @@
+\documentclass{article}
+\usepackage[a4paper,margin=0mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern,microtype,graphicx,tikz,ragged2e,enumitem}
+\usetikzlibrary{calc,arrows.meta}
+\renewcommand{\familydefault}{\sfdefault}
+\pagestyle{empty}
+\definecolor{navy}{HTML}{063552}
+\definecolor{orange}{HTML}{F7941D}
+\definecolor{line}{HTML}{B7C5CD}
+\definecolor{pale}{HTML}{F2F7FA}
+\definecolor{ink}{HTML}{122A3A}
+\setlength{\parindent}{0pt}
+\setlist[itemize]{label=\textcolor{orange}{\rule{1.4mm}{1.4mm}},leftmargin=3.6mm,itemsep=1.2mm,topsep=0pt,parsep=0pt}
+% Absolute positions are in millimetres from the top-left of the A4 page.
+\newcommand{\panel}[5]{%
+  \filldraw[fill=white,draw=line,line width=.45pt,rounded corners=2.5mm] (#1,#2) rectangle ++(#3,#4);
+  \begin{scope}
+    \clip[rounded corners=2.5mm] (#1,#2) rectangle ++(#3,#4);
+    \fill[navy] (#1,#2) rectangle ++(#3,9);
+    \fill[orange] ({#1+#3-4},#2) -- ({#1+#3},#2) -- ({#1+#3},{#2+9}) -- ({#1+#3-8},{#2+9}) -- cycle;
+  \end{scope}
+  \node[anchor=west,text=white,font=\bfseries\fontsize{12}{13}\selectfont] at ({#1+4},{#2+4.5}) {#5};
+}
+\newcommand{\copyblock}[4]{\node[anchor=north west,inner sep=0pt,text=ink] at (#1,#2) {\begin{minipage}{#3mm}\fontsize{8}{9.5}\selectfont\RaggedRight #4\end{minipage}};}
+\newcommand{\step}[2]{\textcolor{orange}{\rule{1.4mm}{1.4mm}}\hspace{1.5mm}\textbf{#1}\par #2\par\vspace{2mm}}
+\begin{document}
+\null
+\begin{tikzpicture}[remember picture,overlay,x=1mm,y=-1mm]
+\begin{scope}[shift={(current page.north west)}]
+\fill[white] (0,0) rectangle (210,297);
+% Header accents and wordmark
+\fill[orange] (181,28) .. controls (197,26) and (204,19) .. (210,12) -- (210,22) .. controls (202,27) and (191,29) .. (181,28);
+\fill[blue!12] (186,29) .. controls (198,28) and (205,26) .. (210,24) -- (210,29) -- cycle;
+\node[anchor=north west,inner sep=0] at (10,5) {\includegraphics[width=28mm,trim=3bp 2bp 3bp 2bp,clip]{assets/thws-logo.png}};
+\copyblock{19.5}{14.5}{30}{\fontsize{6}{7.5}\selectfont Technical University of\\Applied Sciences\\Würzburg-Schweinfurt}
+\draw[navy,line width=.7pt] (51,5) -- (51,26);
+\node[anchor=north west,inner sep=0,text=navy,font=\bfseries\fontsize{20}{23}\selectfont] at (57,5) {KIWi -- KI-Wissensassistenz};
+\copyblock{57}{15}{147}{\bfseries\fontsize{9}{11}\selectfont AI-Powered Knowledge Assistance for the THWS CampusPortal}
+\copyblock{57}{24}{147}{\fontsize{6.8}{8}\selectfont Retrieval-Augmented Generation (RAG)\enspace|\enspace Local LLM\enspace|\enspace University Knowledge Retrieval}
+% First row
+\panel{5}{33}{98}{51}{\textcircled{\small ?}\quad Problem}
+\panel{107}{33}{98}{51}{\textcircled{\small +}\quad Objectives}
+\copyblock{9}{45}{90}{\begin{itemize}
+\item University information is distributed across different sources (e.g., CampusPortal, wikis and manuals).
+\item Finding relevant and up-to-date answers is time-consuming.
+\item Traditional search can struggle with natural-language questions and process-related context.
+\item University information requires privacy-conscious processing.
+\end{itemize}}
+\copyblock{111}{45}{90}{\fontsize{7.8}{9}\selectfont\begin{itemize}\setlength{\itemsep}{.9mm}
+\item Enable \textbf{natural-language question answering} about university processes.
+\item Retrieve relevant information from \textbf{approved knowledge sources}.
+\item Generate context-aware answers using RAG.
+\item Provide answers with source references and URLs.
+\item Support a \textbf{locally hosted solution} without external LLM APIs.
+\item Evaluate retrieval quality, correctness and response time.
+\end{itemize}}
+% Methodology
+\panel{5}{89}{200}{57}{\textcircled{\small *}\quad Methodology}
+\draw[line,line width=.4pt] (105,102) -- (105,142);
+\copyblock{9}{102}{91}{
+\step{Data Ingestion}{Available university knowledge records are collected from CSV files, combining synthetic data and publicly available THWS information.}
+\step{Data Preprocessing}{Questions, answers, key facts, evidence and source details are cleaned and prepared for further processing.}
+\step{Text Chunking}{Longer records are divided into smaller text passages while preserving relevant metadata and source information.}}
+\copyblock{110}{102}{91}{
+\step{Embedding Generation}{BGE-M3 converts text passages into numerical vector representations for semantic search.}
+\step{Information Retrieval}{ChromaDB stores embeddings and retrieves relevant passages based on the user's natural-language query.}
+\step{Answer Generation}{Qwen 2.5 7B Instruct, running locally through Ollama, generates context-aware answers using retrieved information and provides supporting source references.}}
+% Architecture: entirely native TikZ, with no external image dependencies.
+\panel{5}{151}{200}{65}{Architecture}
+\begin{scope}[shift={(9,165)},
+  flow/.style={-{Latex[length=1.7mm]},draw=navy,line width=.9pt},
+  block/.style={draw=line,fill=pale,rounded corners=2mm,line width=.5pt},
+  labeltext/.style={text=navy,align=center,font=\fontsize{7.2}{8.5}\selectfont}]
+  % Knowledge sources and user query.
+  \filldraw[block,fill=blue!7] (0,0) rectangle (44,32);
+  \node[labeltext,font=\bfseries\fontsize{8}{9}\selectfont] at (22,4) {Knowledge Sources};
+  \node[labeltext] at (25,13) {CSV Data\\(Approved Records)};
+  \node[labeltext] at (25,25) {THWS Information\\(e.g., CampusPortal\\Documentation)};
+  % Document icon.
+  \draw[navy,line width=.7pt] (3,9) -- (7,9) -- (9,11) -- (9,17) -- (3,17) -- cycle;
+  \draw[navy,line width=.6pt] (7,9) -- (7,11) -- (9,11) (4.5,12) -- (7.5,12) (4.5,14) -- (7.5,14);
+  % Globe icon.
+  \draw[navy,line width=.6pt] (6,25) circle (3mm);
+  \draw[navy,line width=.5pt] (3,25) -- (9,25) (6,22) ellipse (1.4mm and 0mm);
+  \draw[navy,line width=.5pt] (6,25) ellipse (1.4mm and 3mm);
+  \filldraw[block] (0,36) rectangle (44,46);
+  \fill[navy] (6,39) circle (1.5mm);
+  \fill[navy] (2.8,44) .. controls (2.8,40) and (9.2,40) .. (9.2,44) -- cycle;
+  \node[labeltext] at (26,41) {\textbf{User Query}\\(Natural Language)};
+  % RAG group and its three processing blocks.
+  \draw[navy,dashed,rounded corners=2.5mm,line width=.5pt] (50,2) rectangle (131,34);
+  \fill[blue!13,rounded corners=2mm] (70,-2) rectangle (112,5);
+  \node[labeltext,font=\bfseries\fontsize{8}{9}\selectfont] at (91,1.5) {RAG Pipeline};
+  \filldraw[block] (53,8) rectangle (75,29);
+  \filldraw[block] (80,8) rectangle (102,29);
+  \filldraw[block] (107,8) rectangle (129,29);
+  % Document-processing icon.
+  \draw[navy,line width=.8pt] (61,11) -- (65,11) -- (67,13) -- (67,18) -- (61,18) -- cycle;
+  \draw[navy,line width=.6pt] (65,11) -- (65,13) -- (67,13) (62.5,14) -- (65.5,14) (62.5,16) -- (65.5,16);
+  \node[labeltext] at (64,24) {\textbf{Document}\\\textbf{Processing}};
+  % Layered embedding icon.
+  \draw[navy,line width=.8pt] (87,13) -- (91,11) -- (95,13) -- (91,15) -- cycle;
+  \draw[navy,line width=.8pt] (87,15) -- (91,17) -- (95,15) (87,17) -- (91,19) -- (95,17);
+  \node[labeltext] at (91,24) {\textbf{Embeddings}\\(BGE-M3)};
+  % Database cylinder icon.
+  \draw[navy,line width=.8pt] (114,13) arc[start angle=180,end angle=360,x radius=4mm,y radius=1.5mm] -- (122,18);
+  \draw[navy,line width=.8pt] (114,13) -- (114,18) arc[start angle=180,end angle=360,x radius=4mm,y radius=1.5mm];
+  \draw[navy,line width=.8pt] (118,13) ellipse (4mm and 1.5mm);
+  \node[labeltext] at (118,24) {\textbf{Vector Store}\\(ChromaDB)};
+  % Local model and answer.
+  \filldraw[block,draw=orange,fill=orange!13] (138,8) rectangle (164,29);
+  \draw[navy,rounded corners=1mm,line width=.7pt] (147,12) rectangle (155,17);
+  \draw[navy,line width=.7pt] (151,12) -- (151,10) (145.5,13.5) -- (147,13.5) (155,13.5) -- (156.5,13.5);
+  \fill[navy] (151,10) circle (.6mm) (149,14) circle (.45mm) (153,14) circle (.45mm);
+  \draw[navy,line width=.5pt] (149.5,15.5) -- (152.5,15.5);
+  \node[labeltext] at (151,23) {\textbf{Local LLM}\\(Qwen 2.5 7B)\\via Ollama};
+  \filldraw[block,fill=blue!7] (171,8) rectangle (192,29);
+  \draw[navy,rounded corners=.7mm,line width=.8pt] (177,11) -- (186,11) -- (186,17) -- (181,17) -- (178,19) -- (178,17) -- (177,17) -- cycle;
+  \foreach \x in {179.5,181.5,183.5} {\fill[navy] (\x,14) circle (.5mm);}
+  \node[labeltext] at (181.5,24) {\textbf{Answer with}\\\textbf{References}};
+  % Ingestion and question paths.
+  \draw[flow] (44,19) -- (50,19);
+  \draw[flow] (75,19) -- (80,19);
+  \draw[flow] (102,19) -- (107,19);
+  \draw[flow] (131,19) -- (138,19);
+  \draw[flow] (164,19) -- (171,19);
+  \draw[flow,rounded corners=2mm] (44,41) -- (118,41) -- (118,30);
+\end{scope}
+% Outcomes
+\panel{5}{221}{200}{55}{\textcircled{\small +}\quad Deliverables / Expected Outcomes}
+\fill[orange!7,rounded corners=2mm] (9,233) rectangle (102,272);
+\fill[pale,rounded corners=2mm] (108,233) rectangle (201,272);
+\fill[orange!25,rounded corners=1.5mm] (12,234) rectangle (62,240);
+\fill[blue!13,rounded corners=1.5mm] (111,234) rectangle (169,240);
+\node[anchor=west,text=navy,font=\bfseries\fontsize{9}{11}\selectfont] at (14,237) {Deliverables};
+\node[anchor=west,text=navy,font=\bfseries\fontsize{9}{11}\selectfont] at (113,237) {Expected Outcomes};
+\draw[line] (105,234) -- (105,271);
+\copyblock{12}{243}{87}{\begin{itemize}\setlength{\itemsep}{1.6mm}
+\item Working local \textbf{RAG prototype}.
+\item Automated CSV knowledge-ingestion pipeline.
+\item Persistent ChromaDB vector database.
+\item Terminal-based question-answering system.
+\item Source-supported answer generation.
+\end{itemize}}
+\copyblock{111}{243}{87}{\begin{itemize}\setlength{\itemsep}{1.6mm}
+\item Faster access to university information.
+\item More transparent, evidence-grounded answers.
+\item Reduced reliance on external AI services.
+\item Foundation for future CampusPortal integration and a web-based interface.
+\end{itemize}}
+% Full-width footer
+\fill[navy] (0,281) rectangle (210,297);
+\draw[white!70,line width=.4pt] (75,284) -- (75,294);
+\draw[white!70,line width=.4pt] (151,284) -- (151,294);
+\node[anchor=north west,text=white,inner sep=0] at (8,284) {\begin{minipage}{64mm}\fontsize{8}{10}\selectfont\textbf{Team Members}\\[1mm]Shreyas\enspace|\enspace Chandana\enspace|\enspace Sahana\enspace|\enspace Suhaimenspace\end{minipage}};
+\node[anchor=north west,text=white,inner sep=0] at (80,284) {\begin{minipage}{67mm}\fontsize{8}{10}\selectfont\textbf{Supervisor}\\[1mm]Prof. Dr. Ivan P. Yamshchikov\end{minipage}};
+\node[anchor=north west,text=white,inner sep=0] at (158,284) {\begin{minipage}{45mm}\fontsize{8}{10}\selectfont\textbf{MAI Project}\\[1mm]WS 2026/27\end{minipage}};
+\end{scope}
+\end{tikzpicture}
+\end{document}

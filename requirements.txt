@@ -1,3 +1,4 @@
 chromadb
 ollama
 langchain-text-splitters
+streamlit>=1.32,<2
