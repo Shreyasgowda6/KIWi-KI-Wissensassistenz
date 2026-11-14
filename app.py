@@ -6,7 +6,6 @@ import importlib
 import re
 from time import perf_counter, sleep
 from kiwi_logging import logger
-from response_format import prepare_response
 from pathlib import Path
 from uuid import uuid4
 from urllib.parse import urlparse
@@ -141,9 +140,6 @@ render_title("compact" if st.session_state.messages else "welcome")
 
 def render_message(message):
     """Keep each answer and its numbered retrieval sources together."""
-    if message["role"] == "assistant":
-        content, sources = prepare_response(message["content"], message.get("sources", []))
-        message = {**message, "content": content, "sources": sources}
     state = message.get("avatar", "default" if message.get("error") else "answer")
     avatar = str(AVATARS.get(state, AVATARS["default"])) if message["role"] == "assistant" else None
     with st.chat_message(message["role"], avatar=avatar):
