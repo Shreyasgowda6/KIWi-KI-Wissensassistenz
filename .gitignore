@@ -5,3 +5,7 @@ chroma_db/
 .DS_Store
 .env
 logs/
+*.aux
+*.log
+*.out
+tmp/pdfs/*.png

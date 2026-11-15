@@ -1,0 +1,421 @@
+
+.stApp, [data-testid="stHeader"] { background: #fff; color: #252525; }
+.block-container { max-width: none; padding-top: 1.6rem; padding-bottom: 2rem; }
+
+h1, h2, h3 { letter-spacing: -.035em; }
+.kiwi-brand { display: flex; align-items: center; gap: 9px; margin: 0 0 26px; }
+.kiwi-monogram { display: grid; place-items: center; width: 30px; height: 30px;
+    background: #ff6b00; color: #202020; border-radius: 9px; font-size: 17px; font-weight: 750; }
+.kiwi-wordmark { font-size: 21px; font-weight: 700; letter-spacing: -.04em; }
+.kiwi-topbar { display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px; color: #777; font-size: 12px; }
+.kiwi-topbar strong { color: #303030; font-size: 18px; font-weight: 600; }
+.kiwi-topbar span { color: #777; }
+.kiwi-hero { text-align: center; padding: clamp(48px, 13vh, 140px) 0 22px; }
+.kiwi-hero .kiwi-monogram { margin: 0 auto 22px; width: 44px; height: 44px; font-size: 24px; border-radius: 14px; }
+.kiwi-hero h1 { font-size: clamp(27px, 4vw, 36px); font-weight: 600; line-height: 1.25;
+    margin: 0 0 12px; padding: 0; }
+.kiwi-hero p { color: #737373; font-size: 15px; line-height: 1.6; margin: 0; }
+.stButton > button { border-radius: 18px; border: 1px solid #e5e5e5;
+    background: #fff; min-height: 40px; color: #535353; transition: background .15s, border-color .15s; }
+.stButton > button p { font-size: 13px; }
+.stButton > button:hover { border-color: #ff6b00; color: #9b4000; background: #fff8f2; }
+.stButton > button:focus-visible { outline: 2px solid #b94700; outline-offset: 3px; }
+
+
+
+
+
+[data-testid="stChatMessageAvatarUser"] { display: none; }
+[data-testid="stChatMessageAvatarAssistant"] { background: #ff6b00; color: #202020; }
+
+
+
+
+
+[data-testid="stBottom"] > div { background: #fff; }
+[data-testid="stExpander"] { border: 1px solid #ededed; border-radius: 12px; background: #fff; }
+.kiwi-note { color: #7a7a7a; text-align: center; font-size: 11px; margin: 20px 0; }
+
+@media (max-width: 640px) {
+    .block-container { padding-top: 1rem; }
+    .kiwi-hero { padding-top: 42px; }
+    
+}
+
+/* Preserve the uploaded THWS logo's proportions in assistant avatars. */
+
+/* Quiet canvas, precise typography, and a focused composer. */
+.stApp { background: #fdfdfc; }
+[data-testid="stHeader"] { background: transparent; }
+.block-container { max-width: none; padding: 2rem 2.5rem 2rem; }
+
+
+.kiwi-brand { margin-bottom: 32px; }
+.kiwi-wordmark { font-size: 25px; font-weight: 750; }
+.kiwi-monogram { background: #262626; color: #ff7a1a; border-radius: 10px; }
+.kiwi-topbar { padding-bottom: 18px; border-bottom: 1px solid #eeeee9; }
+.kiwi-topbar strong { font-size: 15px; }
+.kiwi-topbar span { font-size: 11px; letter-spacing: .04em; }
+.kiwi-hero { text-align: left; padding: clamp(38px, 9vh, 92px) 0 26px; }
+.kiwi-hero .kiwi-monogram { margin: 0 0 24px; background: #fff0e4; color: #bb4c00;
+    border: 1px solid #ffdcc0; box-shadow: 0 5px 15px #ff6b0008; }
+.kiwi-hero h1 { font-size: clamp(32px, 4vw, 46px); font-weight: 650; letter-spacing: -.045em; }
+.kiwi-hero h1 span { color: #96958e; }
+.kiwi-hero p { margin-top: 16px; font-size: 15px; max-width: 480px; }
+.kiwi-eyebrow { font-size: 10px; font-weight: 700; color: #a64a08; letter-spacing: .16em; margin-bottom: 16px; }
+
+
+
+.stButton > button { border-radius: 12px; background: transparent; min-height: 55px;
+    border-color: #e5e5df; justify-content: flex-start; padding: 12px 16px; }
+.stButton > button p { font-size: 12px; }
+
+
+.kiwi-note { font-size: 11px; color: #85857e; margin: 10px 0 26px; }
+
+
+
+@media (max-width: 640px) {
+ .block-container { padding: 1rem; }
+ .kiwi-hero { padding-top: 30px; }
+ .kiwi-hero h1 { font-size: 32px; }
+}
+
+/* Telegram-style conversation: incoming left, outgoing right. */
+/* All loading effects run in the browser, independently of model inference. */
+.kiwi-loading { display: flex; align-items: flex-end; gap: 12px; margin: 12px 0 24px; }
+.kiwi-loading-avatar {
+    position: relative; display: grid; place-items: center;
+    width: 40px; height: 40px; flex: 0 0 40px;
+    border-radius: 50%; background: #fff4e9;
+}
+.kiwi-loading-avatar::before {
+    content: ''; position: absolute; inset: -3px; border: 2px solid #ff8a38;
+    border-radius: 50%; animation: kiwi-avatar-pulse 1.8s ease-out infinite;
+}
+.kiwi-loading-avatar img { width: 26px; height: 26px; object-fit: contain; }
+.kiwi-loading-bubble {
+    min-width: 0; padding: 16px 20px; border: 1px solid #e3e5e8;
+    border-radius: 18px 18px 18px 4px;
+    background: #fff;
+    box-shadow: 0 4px 18px #20202008;
+}
+.kiwi-loading-labels { display: grid; font-size: 14px; color: #615247; line-height: 1.6; }
+.kiwi-loading-labels > span { grid-area: 1 / 1; }
+.kiwi-loading-initial { animation: kiwi-message-first 10s step-end infinite; }
+.kiwi-loading-long { visibility: hidden; animation: kiwi-message-second 10s step-end infinite; }
+.kiwi-typing-dots { display: flex; gap: 5px; height: 16px; align-items: center; margin-top: 9px; }
+.kiwi-typing-dots i {
+    display: block; width: 6px; height: 6px; border-radius: 50%; background: #f76b0b;
+    animation: kiwi-dot-wave 1.2s ease-in-out infinite;
+}
+.kiwi-typing-dots i:nth-child(2) { animation-delay: .16s; }
+.kiwi-typing-dots i:nth-child(3) { animation-delay: .32s; }
+@keyframes kiwi-avatar-pulse {
+    0% { transform: scale(.95); opacity: .7; }
+    100% { transform: scale(1.3); opacity: 0; }
+}
+@keyframes kiwi-dot-wave {
+    0%, 60%, 100% { transform: translateY(0); opacity: .4; }
+    30% { transform: translateY(-5px); opacity: 1; }
+}
+@keyframes kiwi-message-first {
+    0%, 100% { visibility: visible; }
+    50% { visibility: hidden; }
+}
+@keyframes kiwi-message-second {
+    0%, 100% { visibility: hidden; }
+    50% { visibility: visible; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .kiwi-loading-avatar::before, .kiwi-typing-dots i { animation: none; }
+    /* Keep the timed text update, even when decorative motion is disabled. */
+}
+
+.kiwi-topbar h1 { margin: 0; padding: 0; font-size: clamp(28px, 4vw, 40px); font-weight: 700; line-height: 1.25; }
+.kiwi-topbar h1 .kiwi-title-accent { color: #ff6b00; font-size: inherit; font-weight: inherit; letter-spacing: inherit; }
+
+[data-testid="stChatMessage"] {
+    background: transparent; border: 0; box-shadow: none;
+    padding: 4px 0 12px; margin: 0; gap: 10px;
+    max-width: 90%; width: fit-content; align-items: flex-end;
+}
+[data-testid="stChatMessage"]:has(.kiwi-role-user) {
+    margin-left: auto; max-width: 82%;
+}
+[data-testid="stChatMessage"]:has(.kiwi-role-assistant) {
+    margin-right: auto;
+}
+[data-testid="stChatMessageContent"] {
+    position: relative; min-width: 0; padding: 16px 20px;
+    border-radius: 18px 18px 18px 4px; background: #fff;
+    border: 1px solid #e7e5e0; box-shadow: 0 2px 5px #24242406;
+    line-height: 1.7; overflow-wrap: anywhere;
+}
+[data-testid="stChatMessage"]:has(.kiwi-role-user) [data-testid="stChatMessageContent"] {
+    background: #f1f3f5; border-color: #e3e5e8;
+    border-radius: 18px 18px 4px 18px;
+}
+[data-testid="stChatMessageContent"]::after {
+    content: ''; position: absolute; bottom: 0; left: -7px;
+    width: 12px; height: 12px; background: #fff;
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+[data-testid="stChatMessage"]:has(.kiwi-role-user) [data-testid="stChatMessageContent"]::after {
+    left: auto; right: -7px; background: #f1f3f5;
+    clip-path: polygon(0 0, 100% 100%, 0 100%);
+}
+[data-testid="stChatMessage"] > img {
+    object-fit: contain; width: 34px; height: 34px; flex: 0 0 34px;
+    padding: 5px; border-radius: 50%; background: #fff;
+    border: 1px solid #eee8e1;
+}
+[data-testid="stChatMessageAvatarUser"] { display: none; }
+/* Role markers are static styling hooks, not visible message content. */
+[data-testid="stElementContainer"]:has(.kiwi-role-user),
+[data-testid="stElementContainer"]:has(.kiwi-role-assistant) { display: none; }
+[data-testid="stChatMessageContent"] [data-testid="stExpander"] { background: #fafaf8; }
+@media (max-width: 640px) {
+    .kiwi-topbar { flex-wrap: wrap; gap: 8px; }
+    [data-testid="stChatMessage"] { max-width: 96%; }
+    [data-testid="stChatMessageContent"] { padding: 12px 14px; }
+}
+
+/* One title moves from the welcome area into the conversation header. */
+.kiwi-chat-title {
+    --title-large: clamp(30px, 4.5vw, 48px);
+    --title-small: clamp(23px, 3vw, 32px);
+    --title-space: clamp(70px, 16vh, 150px);
+    padding: 0 0 20px;
+    margin-bottom: 20px;
+}
+.kiwi-chat-title h1 {
+    color: #142d4e; font-size: var(--title-large); font-weight: 700;
+    line-height: 1.2; letter-spacing: -.045em; padding: 0; margin: 0;
+    transform-origin: left bottom;
+    transform: translate3d(0, 0, 0) scale(.62);
+}
+.kiwi-chat-title h1 span { font: inherit; letter-spacing: inherit; }
+.kiwi-chat-title h1 .kiwi-name-orange { color: #ff6b00 !important; }
+.kiwi-chat-title h1 .kiwi-name-navy { color: #142d4e !important; }
+.kiwi-title-welcome { padding-top: calc(var(--title-space) + 65px); padding-bottom: 40px; }
+.kiwi-chat-title.kiwi-title-welcome h1 {
+    display: block; font-size: var(--title-large); transform: scaleY(1.6);
+    transform-origin: left bottom;
+}
+.kiwi-title-compact { border-bottom: 1px solid #eeeee9; }
+.kiwi-title-shrinking {
+    border-bottom: 1px solid #eeeee9;
+    animation: kiwi-title-settle 1.15s cubic-bezier(.45, 0, .2, 1) both;
+}
+.kiwi-title-shrinking h1 {
+    will-change: transform;
+    animation: kiwi-title-shrink 1.15s cubic-bezier(.45, 0, .2, 1) both;
+}
+@keyframes kiwi-title-settle {
+    from { padding-top: calc(var(--title-space) + 65px); padding-bottom: 40px; border-color: transparent; }
+    to { padding-top: 0; padding-bottom: 20px; border-color: #eeeee9; }
+}
+@keyframes kiwi-title-shrink {
+    from { transform: translate3d(0, 0, 0) scale(1, 1.6); }
+    to { transform: translate3d(0, 0, 0) scale(.62); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .kiwi-title-shrinking, .kiwi-title-shrinking h1 { animation-duration: .01s; }
+}
+
+/* Character artwork stays uncropped so each pose is readable. */
+[data-testid="stChatMessage"] > img {
+    width: 68px; height: 82px; flex: 0 0 68px;
+    object-fit: contain; padding: 0; border: 0; border-radius: 0; background: transparent;
+}
+.kiwi-loading-avatar { width: 80px; height: 96px; flex-basis: 80px; background: transparent; }
+.kiwi-loading-avatar img { width: 80px; height: 96px; object-fit: contain;
+    animation: kiwi-meditate 2.4s ease-in-out infinite; }
+.kiwi-loading-avatar::before { inset: auto 12px 2px; height: 8px; border: 0;
+    background: #f5822020; animation: kiwi-avatar-pulse 2.4s ease-out infinite; }
+@keyframes kiwi-meditate { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@media (prefers-reduced-motion: reduce) { .kiwi-loading-avatar img { animation: none; } }
+@media (max-width: 640px) {
+    [data-testid="stChatMessage"] > img { width: 48px; height: 62px; flex-basis: 48px; }
+    .kiwi-loading-avatar, .kiwi-loading-avatar img { width: 60px; height: 76px; }
+    .kiwi-loading-avatar { flex-basis: 60px; }
+}
+
+
+/* Align the artwork and title by their centers, without absolute offsets. */
+.kiwi-chat-title {
+    display: flex; align-items: center; gap: 16px;
+    --mascot-offset: 128px;
+}
+.kiwi-title-avatar {
+    display: block; position: static; width: 112px; height: 112px;
+    flex: 0 0 112px; object-fit: contain; pointer-events: none;
+}
+.kiwi-chat-title h1 { transform-origin: left center; }
+.kiwi-chat-title.kiwi-title-welcome h1 {
+    min-width: 0; transform: scale(.9, 1.6); transform-origin: left center;
+}
+@keyframes kiwi-title-shrink {
+    from { transform: translate3d(var(--mascot-offset), 0, 0) scale(.9, 1.6); }
+    to { transform: translate3d(0, 0, 0) scale(.62); }
+}
+@keyframes kiwi-title-settle {
+    from { padding-top: calc(var(--title-space) + 65px); padding-bottom: 40px;
+        min-height: 112px; border-color: transparent; }
+    to { padding-top: 0; padding-bottom: 20px;
+        min-height: 0; border-color: #eeeee9; }
+}
+@media (max-width: 640px) {
+    .kiwi-chat-title { --mascot-offset: 74px; gap: 12px;
+        --title-large: clamp(23px, 5.1vw, 32px); }
+    .kiwi-title-avatar { width: 62px; height: 80px; flex-basis: 62px; }
+}
+
+/* One pill-shaped composer; inner Streamlit wrappers are visually transparent. */
+[data-testid="stChatInput"] {
+    background: #f4f4f4 !important; border: 1px solid #e3e3e3 !important;
+    border-radius: 32px !important; padding: 7px 12px 7px 20px;
+    box-shadow: none !important;
+}
+[data-testid="stChatInput"]:focus-within { border-color: #aeb4bc !important; }
+[data-testid="stChatInput"] > div,
+[data-testid="stChatInput"] [data-baseweb="textarea"],
+[data-testid="stChatInput"] [data-baseweb="base-input"],
+[data-testid="stChatInput"] textarea {
+    background: transparent !important; border: 0 !important;
+    box-shadow: none !important; outline: none !important;
+}
+[data-testid="stChatInput"] textarea { font-size: 15px; }
+[data-testid="stChatInputSubmitButton"] {
+    background: #ff6b00 !important; color: #202020 !important;
+    border: 0 !important; border-radius: 50% !important;
+    width: 36px; height: 36px; min-width: 36px;
+}
+[data-testid="stChatInputSubmitButton"]:hover { background: #e85f00 !important; }
+[data-testid="stChatInputSubmitButton"]:focus-visible { outline: 2px solid #777; outline-offset: 3px; }
+[data-testid="stChatInputSubmitButton"]:disabled { background: #ddd !important; color: #888 !important; }
+
+
+/* Sidebar: one layout, independent of the chat canvas. */
+[data-testid="stSidebar"] {
+    background: #f5f5f3; border-right: 1px solid #e7e7e2;
+    width: 260px;
+}
+[data-testid="stSidebarUserContent"] { padding: 0 14px 14px !important; }
+.st-key-kiwi_navigation {
+    height: calc(100dvh - 76px); min-height: 360px;
+    display: flex; flex-direction: column; gap: 0 !important;
+}
+.st-key-kiwi_nav_top { flex: 0 0 auto; gap: 18px !important; padding: 8px 0 22px; }
+.kiwi-nav-brand { display: flex; flex-direction: column; gap: 10px; padding: 0 12px; }
+.kiwi-nav-brand img { display: block; width: 148px; height: 76px; object-fit: contain; object-position: left center; }
+.kiwi-nav-brand span { font-size: 11px; color: #777b80; letter-spacing: .02em; }
+.st-key-kiwi_nav_history {
+    flex: 1 1 0%; min-height: 0; overflow-y: auto; overflow-x: hidden;
+    gap: 4px !important; padding: 0 2px; scrollbar-width: thin;
+}
+.kiwi-history-label { padding: 4px 10px 12px; color: #84878b; font-size: 11px; font-weight: 600; }
+.kiwi-history-empty { padding: 8px 10px; font-size: 12px; line-height: 1.8; color: #94979b; }
+[data-testid="stSidebar"] button[kind] {
+    justify-content: flex-start !important; text-align: left; gap: 10px;
+    min-height: 40px; padding: 9px 12px; border: 0 !important;
+    border-radius: 9px; background: transparent; color: #555b63;
+    box-shadow: none; transition: background .15s;
+}
+[data-testid="stSidebar"] button[kind] p {
+    text-align: left; font-size: 13px; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+}
+[data-testid="stSidebar"] button[kind]:hover { background: #eaeae7; color: #182b43; }
+[data-testid="stSidebar"] button[kind="primary"] { background: #e5e6e3; color: #142d4e; }
+[data-testid="stSidebar"] .st-key-sidebar_new_chat button {
+    background: #fff; border: 1px solid #dedfda !important;
+    color: #142d4e; min-height: 43px; font-weight: 600;
+    box-shadow: 0 1px 2px #00000004;
+}
+[data-testid="stSidebar"] .st-key-sidebar_new_chat button:hover { background: #ededeb; }
+
+
+
+.kiwi-nav-footer { display: flex; align-items: center; gap: 10px; padding: 6px 12px 2px; }
+.kiwi-nav-footer strong { font-size: 15px; color: #142d4e; letter-spacing: -.03em; }
+.kiwi-nav-footer span { font-size: 10px; color: #92969b; }
+
+/* A stable desktop shell: collapsed-sidebar state cannot leave a blank gutter. */
+[data-testid="stToolbar"], [data-testid="stAppDeployButton"], #MainMenu {
+    display: none !important;
+}
+@media (min-width: 769px) {
+    [data-testid="stSidebar"] {
+        position: fixed !important; inset: 0 auto 0 0 !important;
+        width: 260px !important; min-width: 260px !important; max-width: 260px !important;
+        transform: none !important; margin-left: 0 !important;
+        display: block !important; visibility: visible !important;
+        z-index: 100; height: 100dvh;
+    }
+    [data-testid="stSidebarContent"], [data-testid="stSidebarUserContent"] {
+        display: block !important; visibility: visible !important;
+    }
+    [data-testid="stSidebarHeader"],
+    [data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebarCollapsedControl"],
+    [data-testid="collapsedControl"],
+    [data-testid="stSidebarResizeHandle"] { display: none !important; }
+    /* Offset the common parent of the header, main area, and composer.
+       Offsetting only stMain leaves Streamlit's wide-mode shell underneath
+       the fixed sidebar. */
+    [data-testid="stAppViewContainer"] > div:has(> main#stMain) {
+        position: fixed !important;
+        top: 0; bottom: 0; left: 260px; right: 0;
+        width: auto !important; min-width: 0 !important;
+        margin: 0 !important; overflow: hidden;
+    }
+    main#stMain {
+        margin-left: 0 !important; width: 100% !important; min-width: 0;
+    }
+    [data-testid="stSidebarUserContent"] { padding-top: 24px !important; }
+    .st-key-kiwi_navigation { height: calc(100dvh - 40px); }
+}
+
+/* Match the header, conversation canvas, and pinned composer gutters. */
+[data-testid="stMainBlockContainer"],
+[data-testid="stBottomBlockContainer"] {
+    width: 100% !important; max-width: none !important;
+    box-sizing: border-box; margin-left: auto !important; margin-right: auto !important;
+    padding-left: 24px !important; padding-right: 24px !important;
+}
+[data-testid="stBottomBlockContainer"] { padding-bottom: 24px !important; }
+/* Target the inner label wrapper too: Streamlit centers this separately. */
+[data-testid="stSidebar"] button[kind] > div {
+    width: 100%; justify-content: flex-start !important; text-align: left !important;
+}
+[data-testid="stSidebar"] button[kind] [data-testid="stMarkdownContainer"] {
+    flex: 1; min-width: 0; text-align: left !important;
+}
+[data-testid="stSidebar"] button[kind] p { text-align: left !important; }
+/* Explicit viewport regions avoid relying on Streamlit's nested flex wrappers. */
+.st-key-kiwi_nav_history { height: calc(100dvh - 340px); min-height: 100px; overflow-y: auto; }
+
+
+@media (max-width: 640px) {
+    [data-testid="stMainBlockContainer"], [data-testid="stBottomBlockContainer"] {
+        padding-left: 16px !important; padding-right: 16px !important;
+    }
+}
+
+/* Static branding, outside Streamlit's scrollable container wrappers. */
+.kiwi-nav-footer {
+    position: fixed; bottom: 16px; left: 14px; width: 232px;
+    height: 42px; box-sizing: border-box; z-index: 101;
+    padding: 12px 10px 0; margin: 0; border-top: 1px solid #e1e2dd;
+    background: #f5f5f3; overflow: hidden;
+}
+[data-testid="stSidebarContent"], [data-testid="stSidebarUserContent"] {
+    overflow: hidden !important;
+}
+.st-key-kiwi_nav_history { max-height: calc(100dvh - 300px); }
+@media (max-width: 768px) {
+    .kiwi-nav-footer { position: absolute; left: 14px; right: 14px; width: auto; }
+}
