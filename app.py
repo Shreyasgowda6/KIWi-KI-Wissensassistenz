@@ -134,6 +134,15 @@ def render_message(message):
         role_class = "assistant" if message["role"] == "assistant" else "user"
         st.markdown(f'<span class="kiwi-role-{role_class}"></span>', unsafe_allow_html=True)
         st.markdown(message["content"])
+        # Put the primary retrieved source directly with the answer so users
+        # can open it without expanding the passage details below.
+        if message["role"] == "assistant" and message.get("sources"):
+            primary = message["sources"][0]
+            source_url = primary.get("source_url", "")
+            parsed_source_url = urlparse(source_url)
+            if parsed_source_url.scheme in {"http", "https"} and parsed_source_url.netloc:
+                source_label = primary.get("section") or primary.get("source") or "Open source"
+                st.link_button(f"Source: {source_label}", source_url)
         if message.get("error"):
             st.error("Check that Ollama is running, the configured models are installed, and the knowledge index is ready. Then submit your question again.")
         if message.get("sources"):
