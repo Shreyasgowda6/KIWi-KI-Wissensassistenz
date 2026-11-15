@@ -5,7 +5,7 @@ import config
 import re
 from time import perf_counter
 from kiwi_logging import logger
-from response_format import prepare_response, is_no_answer
+from response_format import prepare_response, is_no_answer, conversational_reply
 
 logger.info("Initializing Ollama client and opening the knowledge index")
 client = ollama.Client(host=config.OLLAMA_HOST)
@@ -172,6 +172,10 @@ def contextualize_query(query, history):
 
 
 def answer(query, k=config.TOP_K, history=None):
+    social = conversational_reply(query)
+    if social:
+        logger.info("Conversational reply: retrieval skipped")
+        return social["content"], []
     started = perf_counter()
     history = recent_history(history)
     search_query = contextualize_query(query, history)

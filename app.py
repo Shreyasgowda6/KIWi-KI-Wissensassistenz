@@ -3,9 +3,9 @@
 import base64
 import hashlib
 import importlib
-import re
 from time import perf_counter, sleep
 from kiwi_logging import logger
+from response_format import conversational_reply
 from pathlib import Path
 from uuid import uuid4
 from urllib.parse import urlparse
@@ -38,18 +38,6 @@ def backend_revision():
     return hashlib.sha256(
         (root / "rag.py").read_bytes() + (root / "response_format.py").read_bytes()
     ).hexdigest()
-
-
-def greeting_language(text):
-    """Only standalone greetings bypass retrieval, never greetings plus questions."""
-    normalized = re.sub(r"[^\w\s]", "", text.casefold()).strip()
-    normalized = " ".join(normalized.split())
-    normalized = re.sub(r"\s+kiwi$", "", normalized)
-    if normalized in {"hi", "hello", "hey", "hi there", "hello there"}:
-        return "en"
-    if normalized in {"hallo", "guten morgen", "guten tag", "guten abend", "moin", "servus"}:
-        return "de"
-    return None
 
 
 def save_reply(reply):
@@ -189,18 +177,10 @@ if question and question.strip():
     st.session_state.messages.append(user_message)
     render_message(user_message)
 
-    language = greeting_language(question)
-    if language:
-        save_reply({
-            "role": "assistant",
-            "avatar": "greeting",
-            "content": (
-                "Hallo! Ich bin KIWi. Wie kann ich dir bei Fragen zur THWS helfen?"
-                if language == "de" else
-                "Hi! I'm KIWi. How can I help you with THWS today?"
-            ),
-        })
-        logger.info("Request %s: greeting answered with waving avatar", request_id)
+    social = conversational_reply(question)
+    if social:
+        save_reply({"role": "assistant", **social})
+        logger.info("Request %s: social message answered without retrieval", request_id)
         finish_title_transition(title_transition_started)
         st.rerun()
 
