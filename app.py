@@ -1,6 +1,7 @@
 """KIWi chat frontend. Start with: python -m streamlit run app.py"""
 
 import base64
+from html import escape
 import hashlib
 import importlib
 from time import perf_counter, sleep
@@ -146,22 +147,27 @@ def render_message(message):
         if message.get("error"):
             st.error("Check that Ollama is running, the configured models are installed, and the knowledge index is ready. Then submit your question again.")
         if message.get("sources"):
-            with st.expander("Sources and retrieved passages"):
-                for number, source in enumerate(message["sources"], 1):
-                    st.write(f"[{number}] {source['source']}")
-                    details = [f"Record: {source['record_id']}"]
-                    if source.get("section"):
-                        details.append(source["section"])
-                    if source.get("source_last_verified"):
-                        details.append(f"Verified: {source['source_last_verified']}")
-                    st.caption(" · ".join(details))
-                    url = source.get("source_url", "")
-                    parsed = urlparse(url)
+            # Group repeated pages, retaining every original citation number.
+            grouped = {}
+            for number, source in enumerate(message["sources"], 1):
+                url = source.get("source_url", "")
+                label = source.get("section") or source.get("source") or "Source"
+                key = url or (label, source.get("record_id", number))
+                entry = grouped.setdefault(key, {"label": label, "url": url, "numbers": []})
+                entry["numbers"].append(number)
+            with st.expander(f"Sources ({len(grouped)})"):
+                rows = []
+                for entry in grouped.values():
+                    numbers = ", ".join(f"[{n}]" for n in entry["numbers"])
+                    label = escape(entry["label"])
+                    parsed = urlparse(entry["url"])
                     if parsed.scheme in {"http", "https"} and parsed.netloc:
-                        st.link_button("Open source", url)
-                    st.text(source["text"])
-                    if number < len(message["sources"]):
-                        st.divider()
+                        label = (
+                            f'<a href="{escape(entry["url"], quote=True)}" '
+                            f'target="_blank" rel="noopener noreferrer">{label} ↗</a>'
+                        )
+                    rows.append(f'<div class="kiwi-source-row"><span>{numbers}</span>{label}</div>')
+                st.markdown('<div class="kiwi-source-list">' + "".join(rows) + '</div>', unsafe_allow_html=True)
 
 
 for message in st.session_state.messages:

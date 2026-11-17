@@ -419,3 +419,10 @@ h1, h2, h3 { letter-spacing: -.035em; }
 @media (max-width: 768px) {
     .kiwi-nav-footer { position: absolute; left: 14px; right: 14px; width: auto; }
 }
+
+/* Compact citations: one linked title per page, with original citation numbers. */
+.kiwi-source-list { display: flex; flex-direction: column; gap: 9px; }
+.kiwi-source-row { display: flex; align-items: baseline; gap: 10px; font-size: 13px; line-height: 1.45; }
+.kiwi-source-row > span { flex-shrink: 0; color: #777; font-size: 12px; }
+.kiwi-source-row a { color: #142d4e; text-decoration: none; overflow-wrap: anywhere; }
+.kiwi-source-row a:hover { text-decoration: underline; }
