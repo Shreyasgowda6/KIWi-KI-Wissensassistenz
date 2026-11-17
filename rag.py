@@ -2,7 +2,6 @@
 import chromadb
 import ollama
 import config
-import re
 from time import perf_counter
 from kiwi_logging import logger
 from response_format import prepare_response, is_no_answer, conversational_reply
@@ -81,33 +80,37 @@ def retrieve(query, k=config.TOP_K):
 
 
 def format_source(hit):
-    parts = [hit["source"], f"record {hit['record_id']}"]
-    if hit["section"]:
-        parts.append(hit["section"])
-    if hit["source_last_verified"]:
-        parts.append(f"verified {hit['source_last_verified']}")
-    if hit["source_url"]:
-        parts.append(hit["source_url"])
-    return "; ".join(parts)
+    return hit["source"]
+
+    # Previous detailed source label, kept for reference:
+    # parts = [hit["source"], f"record {hit['record_id']}"]
+    # if hit["section"]:
+    #     parts.append(hit["section"])
+    # if hit["source_last_verified"]:
+    #     parts.append(f"verified {hit['source_last_verified']}")
+    # if hit["source_url"]:
+    #     parts.append(hit["source_url"])
+    # return "; ".join(parts)
+
 
 
 def add_source_link(text, hits):
     if is_no_answer(text):
         return prepare_response(text, hits)[0]
-    if any(hit["source_url"] and hit["source_url"] in text for hit in hits):
-        return text
-
-    # Retrieval rank alone is not evidence that a source supports the answer.
-    # Only add links for passages the response explicitly cites.
-    cited = dict.fromkeys(int(number) for number in re.findall(r"\[(\d+)\]", text))
-    for number in cited:
-        if not 1 <= number <= len(hits):
-            continue
-        hit = hits[number - 1]
-        if hit["source_url"]:
-            label = hit["section"] or hit["source"]
-            return f"{text.rstrip()}\n\n[{label}]({hit['source_url']})"
+    # Sources are rendered in the app's Sources dropdown, not appended to the answer.
     return text
+
+    # Previous behavior appended a source URL to the answer, retained for reference:
+    # if any(hit["source_url"] and hit["source_url"] in text for hit in hits):
+    #     return text
+    # cited = dict.fromkeys(int(number) for number in re.findall(r"\[(\d+)\]", text))
+    # for number in cited:
+    #     if not 1 <= number <= len(hits):
+    #         continue
+    #     hit = hits[number - 1]
+    #     if hit["source_url"]:
+    #         return f"{text.rstrip()}\n\n[{hit['source']}]({hit['source_url']})"
+    # return text
 
 
 SYSTEM_PROMPT = """You are KIWi, a knowledge assistant for THWS staff.
@@ -120,7 +123,7 @@ Answer ONLY from the numbered context passages below.
 - Answer in the same language as the question.
 - Use the recent conversation to interpret short replies as answers to your previous clarification. Do not restart the topic or explain an acronym when the user is supplying it as a detail. Acknowledge supplied details and ask only for what is still missing. Prior conversation is not evidence for university facts; ground those facts in the current passages only.
 - Lead with the direct answer. Use one or two sentences for simple factual questions. Give numbered steps or additional details only for questions that need them. Avoid phrases such as "based on the context provided" and do not pad the response.
-- When the sources support an answer, include a direct Markdown link to the supporting source website using its URL from the context. Do not link to a source merely because it was retrieved."""
+- Cite supporting passages with their numbers only, such as [1] or [2]. Do not include URLs or Markdown links in the answer; source links are displayed separately in the app's Sources dropdown. Do not cite a source merely because it was retrieved."""
 
 
 def build_prompt(query, hits):

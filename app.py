@@ -2,7 +2,9 @@
 
 import base64
 import hashlib
+import html
 import importlib
+import re
 from time import perf_counter, sleep
 from kiwi_logging import logger
 from response_format import conversational_reply
@@ -133,35 +135,137 @@ def render_message(message):
     with st.chat_message(message["role"], avatar=avatar):
         role_class = "assistant" if message["role"] == "assistant" else "user"
         st.markdown(f'<span class="kiwi-role-{role_class}"></span>', unsafe_allow_html=True)
-        st.markdown(message["content"])
-        # Put the primary retrieved source directly with the answer so users
-        # can open it without expanding the passage details below.
+        answer_text = message["content"]
+        for source in message.get("sources", []):
+            source_url = source.get("source_url", "")
+            if source_url:
+                answer_text = re.sub(
+                    rf"\[[^\]]*\]\({re.escape(source_url)}\)",
+                    "",
+                    answer_text,
+                )
+        # Keep source links inside a dropdown and renumber unique URLs in order.
         if message["role"] == "assistant" and message.get("sources"):
-            primary = message["sources"][0]
-            source_url = primary.get("source_url", "")
-            parsed_source_url = urlparse(source_url)
-            if parsed_source_url.scheme in {"http", "https"} and parsed_source_url.netloc:
-                source_label = primary.get("section") or primary.get("source") or "Open source"
-                st.link_button(f"Source: {source_label}", source_url)
+            sources = message["sources"]
+            cited_numbers = list(dict.fromkeys(
+                int(number) for number in re.findall(r"\[(\d+)\]", answer_text)
+            ))
+            candidate_sources = [
+                (number, sources[number - 1])
+                for number in cited_numbers
+                if 1 <= number <= len(sources)
+            ]
+            candidate_sources.extend(
+                (number, source)
+                for number, source in enumerate(sources, 1)
+                if number not in cited_numbers
+            )
+
+            unique_sources = []
+            seen_source_links = set()
+            source_number_map = {}
+            url_number_map = {}
+            for original_number, source in candidate_sources:
+                source_url = source.get("source_url", "")
+                parsed_source_url = urlparse(source_url)
+                if parsed_source_url.scheme not in {"http", "https"} or not parsed_source_url.netloc:
+                    continue
+                if source_url in seen_source_links:
+                    source_number_map[original_number] = url_number_map[source_url]
+                    continue
+                if len(unique_sources) == 3:
+                    continue
+                seen_source_links.add(source_url)
+                display_number = len(unique_sources) + 1
+                unique_sources.append((display_number, source))
+                source_number_map[original_number] = display_number
+                url_number_map[source_url] = display_number
+
+            # Map duplicate source passages to the same displayed citation number.
+            for original_number, source in enumerate(sources, 1):
+                source_url = source.get("source_url", "")
+                if original_number not in source_number_map and source_url in url_number_map:
+                    source_number_map[original_number] = url_number_map[source_url]
+
+            answer_text = re.sub(
+                r"\[(\d+)\]",
+                lambda match: f"[{source_number_map.get(int(match.group(1)), int(match.group(1)))}]",
+                answer_text,
+            )
+
+        st.markdown(answer_text.strip())
+        if message["role"] == "assistant" and message.get("sources"):
+
+            if unique_sources:
+                with st.expander("Sources"):
+                    st.markdown(
+                        "<style>"
+                        ".kiwi-source-link { color: inherit !important; text-decoration: none; }"
+                        ".kiwi-source-link:hover { color: #1f77b4 !important; text-decoration: underline; }"
+                        "</style>",
+                        unsafe_allow_html=True,
+                    )
+                    for number, source in unique_sources:
+                        source_name = (
+                            source.get("section")
+                            or source.get("topic")
+                            or source.get("source")
+                            or "Source"
+                        )
+                        link = html.escape(source["source_url"], quote=True)
+                        label = html.escape(source_name)
+                        st.markdown(
+                            f'[{number}] <a class="kiwi-source-link" href="{link}" '
+                            f'target="_blank" rel="noopener noreferrer">{label}</a>',
+                            unsafe_allow_html=True,
+                        )
+        # Previous directly displayed source links, retained for reference:
+        # for source in unique_sources:
+        #     source_name = source.get("source") or "Source"
+        #     st.markdown(f"[{source_name}]({source['source_url']})")
+        # Previous separate-name and button display, retained for reference:
+        # for source in unique_sources:
+        #     st.markdown(source.get("source") or "Source")
+        #     st.link_button("Open source", source["source_url"])
+        # Previous primary source display, retained for reference:
+        # if message["role"] == "assistant" and message.get("sources"):
+        #     primary = message["sources"][0]
+        #     source_url = primary.get("source_url", "")
+        #     parsed_source_url = urlparse(source_url)
+        #     if parsed_source_url.scheme in {"http", "https"} and parsed_source_url.netloc:
+        #         source_label = primary.get("section") or primary.get("source") or "Open source"
+        #         st.link_button(f"Source: {source_label}", source_url)
         if message.get("error"):
             st.error("Check that Ollama is running, the configured models are installed, and the knowledge index is ready. Then submit your question again.")
-        if message.get("sources"):
-            with st.expander("Sources and retrieved passages"):
-                for number, source in enumerate(message["sources"], 1):
-                    st.write(f"[{number}] {source['source']}")
-                    details = [f"Record: {source['record_id']}"]
-                    if source.get("section"):
-                        details.append(source["section"])
-                    if source.get("source_last_verified"):
-                        details.append(f"Verified: {source['source_last_verified']}")
-                    st.caption(" · ".join(details))
-                    url = source.get("source_url", "")
-                    parsed = urlparse(url)
-                    if parsed.scheme in {"http", "https"} and parsed.netloc:
-                        st.link_button("Open source", url)
-                    st.text(source["text"])
-                    if number < len(message["sources"]):
-                        st.divider()
+        # Previous list of every retrieved source, retained for reference:
+        # if message.get("sources"):
+        #     with st.expander("Sources"):
+        #         for number, source in enumerate(message["sources"], 1):
+        #             st.write(f"[{number}] {source['source']}")
+        #             url = source.get("source_url", "")
+        #             parsed = urlparse(url)
+        #             if parsed.scheme in {"http", "https"} and parsed.netloc:
+        #                 st.link_button("Open source", url)
+        #             if number < len(message["sources"]):
+        #                 st.divider()
+        # Previous detailed passage display, retained for reference:
+        # if message.get("sources"):
+        #     with st.expander("Sources and retrieved passages"):
+        #         for number, source in enumerate(message["sources"], 1):
+        #             st.write(f"[{number}] {source['source']}")
+        #             details = [f"Record: {source['record_id']}"]
+        #             if source.get("section"):
+        #                 details.append(source["section"])
+        #             if source.get("source_last_verified"):
+        #                 details.append(f"Verified: {source['source_last_verified']}")
+        #             st.caption(" · ".join(details))
+        #             url = source.get("source_url", "")
+        #             parsed = urlparse(url)
+        #             if parsed.scheme in {"http", "https"} and parsed.netloc:
+        #                 st.link_button("Open source", url)
+        #             st.text(source["text"])
+        #             if number < len(message["sources"]):
+        #                 st.divider()
 
 
 for message in st.session_state.messages:
